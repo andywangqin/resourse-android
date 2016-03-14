@@ -1,0 +1,82 @@
+Android
+0、Blog
+android-dev-cn【https://github.com/android-cn/android-dev-cn】
+android-dev-com【https://github.com/android-cn/android-dev-com】
+老罗【http://blog.csdn.net/luoshengyang】
+Innost的专栏［http://blog.csdn.net/innost］
+Trinea［http://www.trinea.cn］
+郭霖【http://blog.csdn.net/guolin_blog】
+任玉刚【http://blog.csdn.net/singwhatiwanna?viewmode=contents】
+胡凯［http://hukai.me/blog/archives/］
+Keegan小钢［http://keeganlee.me］
+bboyfeiyu/android-tech-frontier［https://github.com/bboyfeiyu/android-tech-frontier］
+Yuantops［http://blog.yuantops.com］
+大叔的愤怒，你驾驭不了【http://blog.csdn.net/jaysong2012?viewmode=contents】
+wangkuiwu【http://wangkuiwu.github.io/】
+技术小黑屋【http://droidyue.com】
+cwlp8024【http://blog.csdn.net/yan8024?viewmode=contents】
+张明云【http://zmywly8866.github.io】
+Android_Tutor的专栏［http://blog.csdn.net/Android_Tutor/article/list/1］
+
+1、Activity，View
+1.1、Activity启动过程
+1.1.1、Android应用程序窗口（Activity）实现框架简要介绍和学习计划 【http://blog.csdn.net/luoshengyang/article/details/8170307】
+1.1.2、Android应用程序的Activity启动过程简要介绍和学习计划［http://blog.csdn.net/luoshengyang/article/details/6685853］
+	提供Binder机制帮助它们相互间进行通信》Activity的启动方式有两种，一种是显式的，一种是隐式的》ActivityManagerService是负责管理Activity的生命周期的，ActivityManagerService还借助 ActivityStack是来把所有的Activity按照后进先出的顺序放在一个堆栈中；对于每一个应用程序来说，都有一个 ActivityThread来表示应用程序的主进程，而每一个ActivityThread都包含有一个ApplicationThread实例，它是 一个Binder对象，负责和其它进程进行通信。》下面简要介绍一下启动的过程：
+1.1.3、Android应用程序窗口（Activity）的运行上下文环境（Context）的创建过程分析［http://blog.csdn.net/luoshengyang/article/details/8201936］
+	装饰模式》ActivityThread.performLaunchActivity》 Instrumentation.newActivity（ return (Activity)cl.loadClass(className).newInstance()）》new Activity（Activity类实例在创建的时候，还没有执行实质的初始化工作。这个初始化工作要等到Activity类的成员函数attach被调用的时候才会执行）》new ContextImpl》ContextImpl.setOuterContext》Activity.attach》 ContextThemeWrapper.attachBaseConext》接下来调用PolicyManager类的静态成员函数makeNewWindow来创建了一个PhoneWindow，并且保存在Activity类的成员变量mWindow中（Window.Callback，参数info指向的是一个ActivityInfo对象，mWindowManager，mApplication和mCurrentConfig）》Instrumentation.callActivityOnCreate（mCalled ）
+1.1.4、Android应用程序窗口（Activity）的窗口对象（Window）的创建过程分析［http://blog.csdn.net/luoshengyang/article/details/8223770］
+	Activity.attach（DecorView）》PolicyManager.makeNewWindow（PolicyManager是一个窗口管理策略类）》Policy.makeNewWindow》new PhoneWindow（创建一个LayoutInflater实例）》Window.setCallback》Window.setSoftInputMode》 Window.setWindowManager(参数appToken用来描述当前正在处理的窗口是与哪一个Activity组件关联的)》WindowManagerImpl.getDefault（Display对象，Resources对象）
+1.1.5、Android应用程序窗口（Activity）的视图对象（View）的创建过程分析[http://blog.csdn.net/luoshengyang/article/details/8245546]
+	Activity组件在启动的时候，系统会为它创建窗口对象（Window），同时，系统也会为 这个窗口对象创建视图对象。另一方面，当Activity组件被激活的时候，系统如果发现与它的应用程序窗口视图对象所关联的ViewRoot对象还没有 创建，那么就会先创建这个ViewRoot对象，以便接下来可以将它的UI渲染出来。
+
+	ActivityThread.handleLaunchActivity》ActivityThread.performLaunchActivity》Activity.onCreate》Activity.setContentView》PhoneWindow.setContentView（PhoneWindow类的成员变量mContentParent用来描述一个类型为DecorView的视图对象）》PhoneWindow.installDecor》 ActivityThread.handleResumeActivity》PhoneWindow.getDecorView》Activity.getWindowManager》LocalWindowManager.addView（一个View对象在与一个ViewRoot对象关联的同时，还会关联一个WindowManager.LayoutParams对象，这个WindowManager.LayoutParams对象是用来描述应用程序窗口视图的布局属性的）》ViewRoot.setView
+1.2、View
+LayoutInflater分析【http://blog.csdn.net/guolin_blog/article/details/12921889】
+View绘制流程【http://blog.csdn.net/guolin_blog/article/details/16330267】
+1.3、Android事件分发机制
+1.3.1、View的事件分发【http://blog.csdn.net/guolin_blog/article/details/9097463】
+从源码中可以看出，这两个方法都是在View的dispatchTouchEvent中调用的，onTouch优先于onTouchEvent执行。如果在onTouch方法中通过返回true将事件消费掉，onTouchEvent将不会再执行。
+另外需要注意的是，onTouch能够得到执行需要两个前提条件，第一mOnTouchListener的值不能为空，第二当前点击的控件必须是 enable的。因此如果你有一个控件是非enable的，那么给它注册onTouch事件将永远得不到执行。对于这一类控件，如果我们想要监听它的 touch事件，就必须通过在该控件中重写onTouchEvent方法来实现。
+1.3.2、VieGroup的事件分发
+1. Android事件分发是先传递到ViewGroup，再由ViewGroup传递到View的。
+2. 在ViewGroup中可以通过onInterceptTouchEvent方法对事件传递进行拦截，onInterceptTouchEvent方法返回true代表不允许事件继续向子View传递，返回false代表不对事件进行拦截，默认返回false。
+3. 子View中如果将传递的事件消费掉，ViewGroup中将无法接收到任何事件。
+1.4、Task和Activity
+在按下Back键时，如何自定义返回到哪个Activity？【http://glblong.blog.51cto.com/3058613/1209829】
+Activity、Task、应用和进程【http://www.cnblogs.com/franksunny/archive/2012/04/17/2453403.html】
+1.5、深入讲解Android中Activity launchMode【http://droidyue.com/blog/2015/08/16/dive-into-android-activity-launchmode/】
+解开Android应用程序组件Activity的"singleTask"之谜【http://blog.csdn.net/luoshengyang/article/details/6714543】
+onNewIntent【http://my.oschina.net/xsjayz/blog/138447】
+1.6、Intent原理分析
+IPC/Binder
+AIDL
+
+2、Service
+1.2、防止service被kill掉
+
+4、Thread
+Message、Handler、MessageQueue、Looper
+6.1、Android异步消息处理机制完全解析，带你从源码的角度彻底理解【http://blog.csdn.net/guolin_blog/article/details/9991569】
+
+5、Animation
+5.1、Android属性动画完全解析(上)，初识属性动画的基本用法【http://blog.csdn.net/guolin_blog/article/details/43536355】
+ValueAnimator
+ObjectAnimator：可以完成淡入淡出、旋转、水平移动、垂直缩放
+ObjectAnimator内部的工作机制并不是直接对我们传入的属性名进行操作的，而是会去寻找这个属性名对应的get和set方法
+AnimatorSet：ObjectAnimator是继承自ValueAnimator的，而ValueAnimator又是继承自Animator的，因此不管是 ValueAnimator还是ObjectAnimator都是可以使用addListener()这个方法的。另外AnimatorSet也是继承自 Animator的
+AnimatorListenerAdapter：
+TypeEvaluator：
+Interpolator：
+ViewPropertyAnimator:
+
+6、网络
+6.2、Android AsyncTask完全解析，带你从源码的角度彻底理解【http://blog.csdn.net/guolin_blog/article/details/11711405】
+mWorker是一个Callable对象，mFuture是一个FutureTask对象
+SerialExecutor
+
+10、应用架构
+10.1、性能优化
+Android性能优化典范【http://hukai.me/android-performance-patterns/】
+
+10.2、Android项目重构之路:架构篇［http://keeganlee.me/post/android/20150605］
